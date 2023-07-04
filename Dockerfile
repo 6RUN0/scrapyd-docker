@@ -2,18 +2,18 @@ FROM python:3.10-slim-bullseye
 # Install scrapyd
 # See https://scrapyd.readthedocs.io
 ENV SCRAPYD_HOME_DIR ${SCRAPYD_HOME_DIR:-/home/scrapyd}
-ENV SCRAPYD_WORK_DIR $SCRAPYD_HOME_DIR/data
+ENV SCRAPYD_WORK_DIR $SCRAPYD_HOME_DIR/worker
 ENV SCRAPYD_GROUP ${SCRAPYD_GROUP:-scrapyd}
 ENV SCRAPYD_GID ${SCRAPYD_GID:-10000}
 ENV SCRAPYD_USER ${SCRAPYD_USER:-scrapyd}
 ENV SCRAPYD_UID ${SCRAPYD_UID:-10000}
 ENV SCRAPYD_PORT ${SCRAPYD_PORT:-6800}
-ENV PLAYWRIGHT_BROWSERS_PATH $SCRAPYD_HOME_DIR/playwright-browsers
+ENV PLAYWRIGHT_BROWSERS_PATH $SCRAPYD_HOME_DIR/.playwright-browsers
 WORKDIR $SCRAPYD_WORK_DIR
 RUN \
     set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends tini gosu lsb-release; \
+    apt-get install -y --no-install-recommends tini gosu lsb-release git; \
     pip install scrapyd; \
     mkdir -p $SCRAPYD_HOME_DIR; \
     mkdir -p $SCRAPYD_WORK_DIR; \
@@ -29,7 +29,7 @@ RUN \
     set -eux; \
     pip install \
        scrapy-playwright \
-       gerapy-item-pipeline; \
+       git+https://github.com/6RUN0/GerapyItemPipeline.git; \
     playwright install chromium --with-deps; \
     chown -R $SCRAPYD_USER:$SCRAPYD_GROUP $PLAYWRIGHT_BROWSERS_PATH;
 # Clean
@@ -48,11 +48,6 @@ RUN \
     echo "[scrapyd]" > $conf_dir/000_bind.conf; \
     echo "bind_address = 0.0.0.0" >> $conf_dir/000_bind.conf; \
     echo "http_port = $SCRAPYD_PORT" >> $conf_dir/000_bind.conf; \
-    echo "[scrapyd]" > $conf_dir/000_dirs.conf; \
-    echo "dbs_dir = dbs" >> $conf_dir/000_dirs.conf; \
-    echo "eggs_dir = eggs" >> $conf_dir/000_dirs.conf; \
-    echo "logs_dir = logs" >> $conf_dir/000_dirs.conf; \
-    echo "items_dir = items" >> $conf_dir/000_dirs.conf; \
     echo "[scrapyd]" > $conf_dir/000_jobstorage.conf; \
     echo "jobstorage = scrapyd.jobstorage.SqliteJobStorage" >> $conf_dir/000_jobstorage.conf; \
     runner=/usr/local/bin/scrapyd-runner; \

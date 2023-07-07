@@ -23,12 +23,16 @@ RUN \
     chown -R $SCRAPYD_USER:$SCRAPYD_GROUP $SCRAPYD_HOME_DIR; \
     chown -R $SCRAPYD_USER:$SCRAPYD_GROUP $SCRAPYD_WORK_DIR;
 # Install addition plugins
-# + https://github.com/scrapy-plugins/scrapy-playwright
 # + https://github.com/Gerapy/GerapyItemPipeline
+# + https://github.com/dateutil/dateutil
+# + https://github.com/scrapy-plugins/scrapy-playwright
+# + https://github.com/scrapy/w3lib
 RUN \
     set -eux; \
     pip install \
+       python-dateutil \
        scrapy-playwright \
+       w3lib \
        git+https://github.com/6RUN0/GerapyItemPipeline.git; \
     playwright install chromium --with-deps; \
     chown -R $SCRAPYD_USER:$SCRAPYD_GROUP $PLAYWRIGHT_BROWSERS_PATH;
